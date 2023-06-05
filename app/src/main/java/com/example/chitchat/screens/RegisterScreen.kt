@@ -27,6 +27,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -41,30 +42,25 @@ import com.example.chitchat.R
 import com.example.chitchat.ui.theme.ChitChatTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.sp
+import com.example.chitchat.viewModels.AuthViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterScreen(
     navToLogin:() -> Unit,
+    navToHome:() -> Unit,
+    authViewModel: AuthViewModel,
     modifier: Modifier = Modifier) {
     val montserratXB = FontFamily(Font(R.font.mont_xb))
 
-    var email by remember {
-        mutableStateOf("")
-    }
-
-    var password by remember {
-        mutableStateOf("")
-    }
-
-    var username by remember {
-        mutableStateOf("")
-    }
+    val authUiState = authViewModel?.authUiState
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier.fillMaxSize().padding(0.dp),
@@ -106,8 +102,8 @@ fun RegisterScreen(
         Spacer(modifier = Modifier.size(30.dp))
 
         OutlinedTextField(
-            value = email,
-            onValueChange = { email = it},
+            value = authUiState?.registerEmail ?: "",
+            onValueChange = { authViewModel?.handleInputStateChanges("registerEmail", it)},
             label = { Text(text = "Email")},
             leadingIcon = {
                 Icon(imageVector = Icons.Default.Email,
@@ -123,8 +119,8 @@ fun RegisterScreen(
         Spacer(modifier = Modifier.size(10.dp))
 
         OutlinedTextField(
-            value = username,
-            onValueChange = { username = it},
+            value = authUiState?.registerUsername ?: "",
+            onValueChange = { authViewModel?.handleInputStateChanges("registerUsername", it)},
             label = { Text(text = "Username")},
             leadingIcon = {
                 Icon(imageVector = Icons.Default.Person,
@@ -140,8 +136,8 @@ fun RegisterScreen(
         Spacer(modifier = Modifier.size(10.dp))
 
         OutlinedTextField(
-            value = password,
-            onValueChange = { password = it},
+            value = authUiState?.registerPassword ?: "",
+            onValueChange = { authViewModel?.handleInputStateChanges("registerPassword", it)},
             label = { Text(text = "Password")},
             leadingIcon = {
                 Icon(imageVector = Icons.Default.Lock,
@@ -157,13 +153,13 @@ fun RegisterScreen(
         Spacer(modifier = Modifier.size(30.dp))
 
         Button(
-            onClick = { /*TODO*/ },
+            onClick = { authViewModel.createNewUser(context = context) },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(5.dp),
             colors = ButtonDefaults.buttonColors(Color(0xFFED4F5C))
         ) {
-            Text(text = "CONFIRM",
+            Text(text = "REGISTER",
                 fontSize = 18.sp,
                 modifier = Modifier.padding(10.dp)
             )
@@ -190,12 +186,17 @@ fun RegisterScreen(
             }
         }
     }
+    LaunchedEffect(key1 = authViewModel.hasUser) {
+        if(authViewModel.hasUser) {
+            navToHome.invoke()
+        }
+    }
 }
 
 @Preview(showSystemUi = true)
 @Composable
 fun PreviewRegisterScreen() {
     ChitChatTheme {
-        RegisterScreen(navToLogin = {})
+        RegisterScreen(navToLogin = {}, navToHome = {}, authViewModel = AuthViewModel())
     }
 }

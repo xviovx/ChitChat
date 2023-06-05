@@ -26,6 +26,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -40,24 +41,35 @@ import com.example.chitchat.R
 import com.example.chitchat.ui.theme.ChitChatTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.sp
+import com.example.chitchat.viewModels.AuthViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
+    authViewModel: AuthViewModel? = null,
     navToRegister:() -> Unit,
+    navToHome:() -> Unit,
     modifier: Modifier = Modifier) {
+
+    val authUiState = authViewModel?.authUiState
+    val error = authUiState?.errorMessage != null
+    val context = LocalContext.current
+
     val montserratXB = FontFamily(Font(R.font.mont_xb))
 
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+//    var email by remember { mutableStateOf("") }
+//    var password by remember { mutableStateOf("") }
 
     Column(
-        modifier = Modifier.fillMaxSize().padding(0.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(0.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
@@ -93,13 +105,16 @@ fun LoginScreen(
             }
         }
 
-
+        if(error){
+            Text(text = authUiState?.errorMessage ?: "",
+            color = Color.Red)
+        }
 
         Spacer(modifier = Modifier.size(30.dp))
 
         OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
+            value = authUiState?.loginEmail ?: "",
+            onValueChange = { authViewModel?.handleInputStateChanges("loginEmail", it)},
             label = { Text(text = "Email") },
             leadingIcon = {
                 Icon(
@@ -116,8 +131,8 @@ fun LoginScreen(
         Spacer(modifier = Modifier.size(20.dp))
 
         OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
+            value = authUiState?.loginPassword ?: "",
+            onValueChange = { authViewModel?.handleInputStateChanges("loginPassword", it)  },
             label = { Text(text = "Password") },
             leadingIcon = {
                 Icon(
@@ -135,12 +150,14 @@ fun LoginScreen(
         Spacer(modifier = Modifier.size(30.dp))
 
         Button(
-            onClick = { /*TODO*/ },
-            modifier = Modifier.fillMaxWidth().padding(5.dp),
+            onClick = { authViewModel?.loginUser(context) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(5.dp),
             colors = ButtonDefaults.buttonColors(Color(0xFFED4F5C))
         ) {
             Text(
-                text = "CONFIRM",
+                text = "Login",
                 fontSize = 18.sp,
                 color = Color.White,
                 modifier = Modifier.padding(10.dp)
@@ -171,7 +188,11 @@ fun LoginScreen(
                 Text(text = "Register")
             }
         }
-
+    }
+    LaunchedEffect(key1 = authViewModel?.hasUser) {
+        if(authViewModel?.hasUser == true) {
+            navToHome.invoke()
+        }
     }
 }
 
@@ -179,6 +200,6 @@ fun LoginScreen(
 @Composable
 fun PreviewLoginScreen() {
     ChitChatTheme {
-        LoginScreen(navToRegister = {})
+        LoginScreen(navToRegister = {}, navToHome = {}, authViewModel = AuthViewModel())
     }
 }
