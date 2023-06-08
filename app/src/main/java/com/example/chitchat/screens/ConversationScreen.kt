@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -19,6 +18,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,7 +26,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
@@ -36,6 +35,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.chitchat.R
@@ -45,9 +45,9 @@ import com.example.chitchat.viewModels.ConversationsViewModel
 
 @Composable
 fun ConversationScreen(
-    viewModel: ConversationsViewModel? = ConversationsViewModel(),
+    viewModel: ConversationsViewModel? = viewModel(),
     onNavToProfile: () -> Unit,
-    onNavToChat: () -> Unit,
+    onNavToChat: (chatId: String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val allConversations = viewModel?.convoList ?: listOf<Conversation>()
@@ -59,7 +59,7 @@ fun ConversationScreen(
             modifier = Modifier
                 .background(Color(0xFFE7EAED))
                 .fillMaxWidth()
-                .height(150.dp)
+                .height(90.dp)
                 .padding(20.dp)
         ) {
             Column {
@@ -77,18 +77,18 @@ fun ConversationScreen(
                     Image(
                         painter = painterResource(id = R.drawable.ic_profile),
                         contentDescription = null,
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(32.dp)
                     )
                 }
             }
-                Text(
-                    text = "Conversations",
-                    fontSize = 26.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = montserratXB,
-                    color = Color(0xFFED4F5C),
-                )
-                Spacer(modifier = Modifier.height(10.dp))
+            Text(
+                text = "Conversations",
+                fontSize = 26.sp,
+                fontWeight = FontWeight.Bold,
+                fontFamily = montserratXB,
+                color = Color(0xFFED4F5C),
+            )
+            Spacer(modifier = Modifier.height(10.dp))
 //                Box(
 //                    modifier = Modifier
 //                        .background(Color(0xFFD6DCE4), RoundedCornerShape(10.dp))
@@ -103,40 +103,38 @@ fun ConversationScreen(
 //                        color = Color(0xFFED4F5C),
 //                    )
 //                }
-            }
-//01:15:18
-        LazyColumn(
-            modifier = Modifier.weight(1f)
-        ) {
+        }
+        LazyColumn(){
             items(allConversations) { conversation ->
-                ConversationCard(
-                    Conversation(
-                        title = conversation.title,
-                        image = conversation.image,
-//                        lastMessage = "Hey, you never replied"
-                    ),
-                    onNavToChat = onNavToChat
-                )
+                Card(modifier = Modifier
+                    .padding(8.dp)
+                    .fillMaxWidth()
+                    .clickable { onNavToChat.invoke(conversation.id)}) {
+                    ConversationCard(
+                        conversation = conversation,
+                        modifier = modifier
+                    )
+                }
             }
         }
     }
 }
-
-
-
 @Composable
 fun ConversationCard(
     conversation: Conversation,
-    modifier: Modifier = Modifier,
-    onNavToChat: () -> Unit
-
+    modifier: Modifier = Modifier
 ) {
     Card(
         modifier = Modifier
             .padding(5.dp)
             .fillMaxWidth()
-            .height(80.dp)
-            .clickable { onNavToChat.invoke() }
+            .height(70.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 2.dp
+        )
     ) {
         Column {
             Row(
@@ -150,7 +148,7 @@ fun ConversationCard(
                         .build(),
                     contentDescription = conversation.title,
                     modifier = Modifier
-                        .size(40.dp)
+                        .size(70.dp)
                         .clip(CircleShape)
                 )
                 Text(
@@ -169,6 +167,7 @@ fun ConversationCard(
         }
     }
 }
+
 
 
 @Preview(showSystemUi = true)

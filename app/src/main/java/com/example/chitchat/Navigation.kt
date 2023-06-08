@@ -3,9 +3,11 @@ package com.example.chitchat
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.chitchat.screens.ChatScreen
 import com.example.chitchat.screens.ConversationScreen
 import com.example.chitchat.screens.LoginScreen
@@ -92,7 +94,7 @@ fun Navigation(
                     }
                 },
                 onNavToChat = {
-                    navController.navigate(HomeRoutes.Chat.name){
+                    navController.navigate("${HomeRoutes.Chat.name}/${it}"){
                         launchSingleTop = true
                     }
                 }
@@ -116,15 +118,16 @@ fun Navigation(
                 })
         }
 
-        composable(route = HomeRoutes.Chat.name) {
-            ChatScreen(
-                navBack = {
-                    navController.navigate(HomeRoutes.Conversations.name){
-                        launchSingleTop = true
-                        popUpTo(route = HomeRoutes.Conversations.name)
-                    }
-                }
-            )
+        composable(
+            route = "${HomeRoutes.Chat.name}/{chatId}",
+            arguments = listOf(navArgument("chatId"){type = NavType.StringType; defaultValue = "chat1234"})
+        ) {
+            ChatScreen(chatId = it.arguments?.getString("chatId"),
+
+                navBack = { navController.navigate(HomeRoutes.Conversations.name){
+                launchSingleTop = true
+                popUpTo(route = HomeRoutes.Conversations.name)
+            } })
         }
 
 

@@ -3,6 +3,7 @@ package com.example.chitchat.repositories
 import android.provider.Telephony.Sms.Conversations
 import android.util.Log
 import com.example.chitchat.models.Conversation
+import com.example.chitchat.models.Message
 import com.example.chitchat.models.User
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -61,14 +62,61 @@ class FirestoreRepository {
     suspend fun getAllConversations(
         onSuccess: (List<Conversation>?) -> Unit
     ) {
+        Log.d("AAA getting convos in repo..", "UesQ")
+        val conversations = arrayListOf<Conversation>()
+
         conversationRef.orderBy("title").get()
             .addOnSuccessListener {
-                Log.d("AAA Conversation Data: ", it.toString())
-                onSuccess(it.toObjects(Conversation::class.java))
+                for(document in it) {
+                    conversations.add(
+                        Conversation(
+                            id = document.id,
+                            title = document.data["title"].toString(),
+                            image = document.data["image"].toString()
+                        )
+                    )
+                }
+                Log.d("AAA Conversation Data: ", conversations.toString())
+                onSuccess(conversations)
             }
             .addOnFailureListener {
                 Log.d("error while trying to retrieve data: ", it.localizedMessage)
                 onSuccess(null)
+            }.await()
+    }
+
+    suspend fun addNewMessage(
+        newMessage: Message,
+        chatId: String,
+        onSuccess: (Boolean) -> Unit
+    ) {
+        conversationRef.document(chatId).collection("messages")
+            .add(newMessage)
+            .addOnSuccessListener {
+                Log.d("AAA new message sent", it.id)
+                onSuccess.invoke(true)
+            }
+            .addOnFailureListener{
+                Log.d("AAA problem adding: ", it.localizedMessage)
+                it.printStackTrace()
+                onSuccess.invoke(false)
+            }.await()
+    }
+    suspend fun getUserProfile(
+        uid: String,
+        onSuccess: (User?) -> Unit
+    ) {
+        Log.d("AAA getting new user: ", uid)
+        userRef.document(uid).get()
+            .addOnSuccessListener {
+                if (it != null) {
+                    onSuccess.invoke(it?.toObject(User::class.java))
+                } else {
+                    onSuccess.invoke(null)
+                }
+            }
+            .addOnFailureListener{
+                onSuccess.invoke(null)
             }.await()
     }
 
