@@ -5,6 +5,7 @@ import android.util.Log
 import com.example.chitchat.models.Conversation
 import com.example.chitchat.models.Message
 import com.example.chitchat.models.User
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.tasks.await
@@ -117,6 +118,23 @@ class FirestoreRepository {
             }
             .addOnFailureListener{
                 onSuccess.invoke(null)
+            }.await()
+    }
+
+     suspend fun updateProfileInformation(
+        user: User,
+        onSuccess: (Boolean) -> Unit
+    ) {
+        userRef.document(user.id)
+            .set(user, SetOptions.merge())
+            .addOnSuccessListener {
+                Log.d("AAA updated user successful: ", "right on!")
+                onSuccess.invoke(true)
+            }
+            .addOnFailureListener {
+                Log.d("AAA update user failed", it.localizedMessage)
+                onSuccess.invoke(false)
+                it.printStackTrace()
             }.await()
     }
 
