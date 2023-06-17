@@ -161,7 +161,7 @@ fun ProfileScreen(
 
         OutlinedTextField(
             value = profileUiState?.email ?: "",
-            onValueChange = { },
+            onValueChange = { viewModel.handleEmailStateChange(it) },
             label = { Text(text = "Email") },
             leadingIcon = {
                 Icon(
@@ -172,8 +172,7 @@ fun ProfileScreen(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
             modifier = Modifier
                 .padding(horizontal = 16.dp)
-                .fillMaxWidth(),
-            enabled = false
+                .fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.size(20.dp))
@@ -190,7 +189,7 @@ fun ProfileScreen(
                 containerColor = Color.White,
                 contentColor = Color(0xFFED4F5C)
             ),
-            border = BorderStroke(width = 2.dp, color = Color(0xFFED4F5C)) // Set the border color to #ED4F5C and increase the width to 2.dp
+            border = BorderStroke(width = 2.dp, color = Color(0xFFED4F5C))
         ) {
             Text("Save Profile")
         }
@@ -204,7 +203,7 @@ fun ProfileScreen(
                 .fillMaxWidth()
                 .height(50.dp)
                 .padding(horizontal = 16.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFED4F5C)) // set your button color here
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFED4F5C))
         ) {
             Text("Sign Out")
         }

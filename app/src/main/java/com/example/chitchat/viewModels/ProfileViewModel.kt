@@ -37,6 +37,10 @@ class ProfileViewModel (
         profileUiState = profileUiState.copy(username = value)
     }
 
+    fun handleEmailStateChange(value: String){
+        profileUiState = profileUiState.copy(email = value)
+    }
+
     fun handleProfileImageChange(value: Uri) {
         profileUiState = profileUiState.copy(profileImage = value)
     }
